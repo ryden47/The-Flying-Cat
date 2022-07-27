@@ -4,22 +4,22 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class LevelController : MonoBehaviour
+public class LevelController_A : MonoBehaviour
 {
     [SerializeField] string _nextLevelName;
 
-    Monster[] _monsters;
+    Dragon[] _dragons;
 
     void OnEnable()
     {
-        _monsters = FindObjectsOfType<Monster>();
+        _dragons = FindObjectsOfType<Dragon>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (MonstersAreAllDead())
-            GoToNextLevel();
+        //if (MonstersAreAllDead())
+       //     GoToNextLevel();
     }
 
     private void GoToNextLevel()
@@ -30,9 +30,9 @@ public class LevelController : MonoBehaviour
 
     private bool MonstersAreAllDead()
     {
-        foreach (var monster in _monsters) {
+        foreach (var dragon in _dragons) {
 
-            if (monster.gameObject.activeSelf)
+            if (dragon.gameObject.activeSelf)
                 return false;
         }
 

@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Bird : MonoBehaviour
+public class RedBird : MonoBehaviour
 {
     [SerializeField] float _launchForce = 500;
     [SerializeField] float _maxDragDistance = 5;

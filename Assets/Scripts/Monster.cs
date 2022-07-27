@@ -25,7 +25,7 @@ public class Monster : MonoBehaviour
     {
         if (hasDied)
             return false;
-        Bird bird = collision.gameObject.GetComponent<Bird>();
+        RedBird bird = collision.gameObject.GetComponent<RedBird>();
         if (bird != null)
         {return true;}
 
