@@ -5,8 +5,8 @@ using UnityEngine;
 
 public class Bird : MonoBehaviour
 {
-    [SerializeField] float _launchForce = 500;
-    [SerializeField] float _maxDragDistance = 5;
+    //[SerializeField] float _launchForce = 500;
+    //[SerializeField] float _maxDragDistance = 5;
     [SerializeField] float _flySpeed = 4f;
 
     enum State
@@ -37,11 +37,12 @@ public class Bird : MonoBehaviour
         _rigidbody2D.isKinematic = true;
     }
 
-    void OnMouseDown()
-    {
-        _spriteRenderer.color = Color.red;    
-    }
+    //void OnMouseDown()
+    //{
+        //_spriteRenderer.color = Color.red;    
+    //}
 
+    /*
      void OnMouseUp()
     {
         Vector2 currentPosition = _rigidbody2D.position;
@@ -73,6 +74,7 @@ public class Bird : MonoBehaviour
 
         _rigidbody2D.position = desiredPosition;
     }
+    */
 
     void FlyUp()
     {
@@ -146,6 +148,7 @@ public class Bird : MonoBehaviour
         
     }
 
+    /*  MAYBE WE NEED THIS
     void OnCollisionEnter2D(Collision2D collision)
     {
         StartCoroutine(ResetAfterDelay());
@@ -158,4 +161,5 @@ public class Bird : MonoBehaviour
         _rigidbody2D.isKinematic = true;
         _rigidbody2D.velocity = Vector2.zero;
     }
+    */
 }
