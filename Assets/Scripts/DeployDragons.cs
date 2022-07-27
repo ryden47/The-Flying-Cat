@@ -5,9 +5,12 @@ using UnityEngine;
 public class DeployDragons : MonoBehaviour
 {
     public GameObject dragonPrefab;
-    public float respawnTime = 1.0f;
-    private float rightBorder;
+    private float rightBorder = -35;
     public Vector2 screenBounds;
+
+    float _upperScreenBound = 4.6f;//4.6f;
+    float _lowerScreenBound = -2.6f;//-2.6f;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -22,7 +25,7 @@ public class DeployDragons : MonoBehaviour
     private void spawnEnemy() {
 
         GameObject a = Instantiate(dragonPrefab) as GameObject;
-        a.transform.position = new Vector2(rightBorder * 2,Random.Range( (-screenBounds.y) + 3, screenBounds.y )); 
+        a.transform.position = new Vector2(rightBorder,Random.Range(_lowerScreenBound , _upperScreenBound));
     }
    IEnumerator dragonWave()
     {

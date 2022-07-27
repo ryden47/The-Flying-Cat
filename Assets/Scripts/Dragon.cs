@@ -17,8 +17,10 @@ public class Dragon : MonoBehaviour
         var dist = (transform.position - Camera.main.transform.position).z;
         leftBorder = Camera.main.ViewportToWorldPoint(new Vector3(0, 0, dist)).x;
 
-        GameObject ground = GameObject.FindGameObjectWithTag("Ground");
+        GameObject ground = GameObject.FindGameObjectWithTag("Background");
         Physics2D.IgnoreCollision(ground.GetComponent<Collider2D>(), GetComponent<Collider2D>());
+       // Physics2D.IgnoreLayerCollision(0, 1);
+       // Physics2D.IgnoreLayerCollision(0, 2);
 
     }
 
@@ -34,6 +36,7 @@ public class Dragon : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        Debug.Log("Collided with" + collision.gameObject);
         if (ShouldDieFromCollision(collision))
         {
             StartCoroutine(Die());
