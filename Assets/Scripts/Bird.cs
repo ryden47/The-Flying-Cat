@@ -8,6 +8,9 @@ public class Bird : MonoBehaviour
     //[SerializeField] float _launchForce = 500;
     //[SerializeField] float _maxDragDistance = 5;
     [SerializeField] float _flySpeed = 4f;
+    [SerializeField] float viewRange = 2;
+    Transform upperFocus, lowerFocus, upper_sqr, lower_sqr;
+    float constant_x_position;
 
     enum State
     {
@@ -21,15 +24,25 @@ public class Bird : MonoBehaviour
     Rigidbody2D _rigidbody2D;
     SpriteRenderer _spriteRenderer;
     State _state;
-    float _upperScreenBound = 4.6f;
-    float _lowerScreenBound = -2.6f;
+    float _upperScreenBound;//4.6f;
+    float _lowerScreenBound;//-2.6f;
+    new Cinemachine.CinemachineTargetGroup camera;
 
     private void Awake()
     {
         _rigidbody2D = GetComponent<Rigidbody2D>();
         _spriteRenderer = GetComponent<SpriteRenderer>();
         _state = State.IdleDescend;
+        upperFocus = this.gameObject.transform.Find("upperFocus");
+        lowerFocus = this.gameObject.transform.Find("lowerFocus");
+        constant_x_position = upperFocus.position.x;
+        _upperScreenBound = GameObject.Find("Mountains & Clouds").transform.position.y + (float)6.8;
+        _lowerScreenBound= GameObject.Find("Ground").transform.position.y + (float)1.45;
+
+        camera = GameObject.Find("TargetGroup").GetComponent<Cinemachine.CinemachineTargetGroup>();
+        //camera.GetComponent<Cinemachine.CinemachineTargetGroup>()
     }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -37,9 +50,90 @@ public class Bird : MonoBehaviour
         _rigidbody2D.isKinematic = true;
     }
 
+    void FlyUp()
+    {
+        if (transform.position.y < _upperScreenBound)
+        {
+            transform.Translate(Vector2.up * _flySpeed * Time.deltaTime, Space.World);
+        }
+        else
+        {
+            _state = State.IdleAscend;
+            transform.Rotate(0.0f, 0.0f, -30f, Space.Self);
+        }
+    }
+
+    void FallDown()
+    {
+        if (transform.position.y > _lowerScreenBound)
+        {
+            transform.Translate(Vector2.down * _flySpeed * Time.deltaTime, Space.World);
+        }
+        else
+        {
+            _state = State.IdleDescend;
+            transform.Rotate(0.0f, 0.0f, 30f, Space.Self);
+        }
+    }
+
+    void StopMoving()
+    {
+        _rigidbody2D.velocity = Vector2.zero;
+    }
+
+    void keepFlying()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            switch (_state)
+            {
+                case State.IdleDescend:
+                    transform.Rotate(0.0f, 0.0f, 30f, Space.Self);
+                    _state = State.Ascend;
+                    break;
+                case State.Ascend:
+                    transform.Rotate(0.0f, 0.0f, -30f, Space.Self);
+                    _state = State.IdleAscend;
+                    break;
+                case State.IdleAscend:
+                    transform.Rotate(0.0f, 0.0f, -30f, Space.Self);
+                    _state = State.Descend;
+                    break;
+                case State.Descend:
+                    transform.Rotate(0.0f, 0.0f, 30f, Space.Self);
+                    _state = State.IdleDescend;
+                    break;
+            }
+        }
+
+        if (_state == State.Ascend)
+        {
+            FlyUp();
+        }
+        else if (_state == State.Descend)
+        {
+            FallDown();
+        }
+        else
+        {
+            StopMoving();
+        }
+        // Keeping the position of the focus objects relative to the bird's y position ONLY.
+        upperFocus.position = new Vector2(constant_x_position, this.transform.position.y + viewRange);
+        lowerFocus.position = new Vector2(constant_x_position, this.transform.position.y - viewRange);
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        keepFlying();
+        
+    }
+
+
     //void OnMouseDown()
     //{
-        //_spriteRenderer.color = Color.red;    
+    //_spriteRenderer.color = Color.red;    
     //}
 
     /*
@@ -75,78 +169,6 @@ public class Bird : MonoBehaviour
         _rigidbody2D.position = desiredPosition;
     }
     */
-
-    void FlyUp()
-    {
-        if (transform.position.y < _upperScreenBound)
-        {
-            transform.Translate(Vector2.up * _flySpeed * Time.deltaTime, Space.World);
-        }
-        else
-        {
-            _state = State.IdleAscend;
-            transform.Rotate(0.0f, 0.0f, -30f, Space.Self);
-        }
-    }
-
-    void FallDown()
-    {
-        if (transform.position.y > _lowerScreenBound)
-        {
-            transform.Translate(Vector2.down * _flySpeed * Time.deltaTime, Space.World);
-        }
-        else
-        {
-            _state = State.IdleDescend;
-            transform.Rotate(0.0f, 0.0f, 30f, Space.Self);
-        }
-    }
-
-    void StopMoving()
-    {
-        _rigidbody2D.velocity = Vector2.zero;
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        if(Input.GetKeyDown(KeyCode.Space))
-        {
-            switch (_state)
-            {
-                case State.IdleDescend:
-                    transform.Rotate(0.0f, 0.0f, 30f, Space.Self);
-                    _state = State.Ascend;
-                    break;
-                case State.Ascend:
-                    transform.Rotate(0.0f, 0.0f, -30f, Space.Self);
-                    _state = State.IdleAscend;
-                    break;
-                case State.IdleAscend:
-                    transform.Rotate(0.0f, 0.0f, -30f, Space.Self);
-                    _state = State.Descend;
-                    break;
-                case State.Descend:
-                    transform.Rotate(0.0f, 0.0f, 30f, Space.Self);
-                    _state = State.IdleDescend;
-                    break;
-            }
-        }
-
-        if(_state == State.Ascend)
-        {
-            FlyUp();
-        }
-        else if(_state == State.Descend)
-        {
-            FallDown();
-        }
-        else
-        {
-            StopMoving();
-        }
-        
-    }
 
     /*  MAYBE WE NEED THIS
     void OnCollisionEnter2D(Collision2D collision)
