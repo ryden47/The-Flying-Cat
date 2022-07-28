@@ -1,23 +1,32 @@
+using Cinemachine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static Cinemachine.CinemachineTargetGroup;
 
 public class RedBird : MonoBehaviour
 {
-    //[SerializeField] float _launchForce = 500;
-    //[SerializeField] float _maxDragDistance = 5;
     [SerializeField] Sprite _deadSprite;
     [SerializeField] float _flySpeed = 4f;
     [SerializeField] float viewRange = 2;
     [SerializeField] bool limitCameraView;
+
     Transform upperFocus, lowerFocus, useWhenLow, useWhenHigh;
-    float constant_x_position1;
-    float constant_x_position2;
     GameObject targetGroupWhenNormal;
     GameObject targetGroupWhenLow;
     GameObject targetGroupWhenHigh;
+    GameObject targetCatOnly;
+    GameObject grave;
+    GameObject cemetery;
+    Rigidbody2D grave_rb;
     Cinemachine.CinemachineVirtualCamera cm_camera;
+
+    float constant_x_position1;
+    float constant_x_position2;
+    public Boolean stillAlive = true;
+    public bool[] falling = {true, true, true};
+
 
     enum State
     {
@@ -54,6 +63,11 @@ public class RedBird : MonoBehaviour
         targetGroupWhenHigh = GameObject.Find("TargetGroupWhenHigh");
         targetGroupWhenLow = GameObject.Find("TargetGroupWhenLow"); ;
         targetGroupWhenNormal = GameObject.Find("TargetGroup");
+        targetCatOnly = GameObject.Find("TargetCatOnly");
+        grave = GameObject.Find("cat_grave");
+        grave_rb = grave.GetComponent<Rigidbody2D>();
+        cemetery = GameObject.Find("graveYard");
+
     }
 
     // Start is called before the first frame update
@@ -61,7 +75,9 @@ public class RedBird : MonoBehaviour
     {
         _startPosition = _rigidbody2D.position;
         _rigidbody2D.isKinematic = true;
-
+        _rigidbody2D.position = new Vector2(_rigidbody2D.position.x, -2.64f);
+        grave.SetActive(false);
+        cemetery.SetActive(false);
     }
 
     void FlyUp()
@@ -141,7 +157,7 @@ public class RedBird : MonoBehaviour
         if (limitCameraView)
         {
             float player_height = gameObject.transform.position.y;
-            if (player_height <= -1.6)  // if i'm too low, lift the camera view
+            if (player_height <= -1.6  ||  (player_height < -0.7  &&  _state == State.Ascend))  // if i'm too low, lift the camera view
             {
                 cm_camera.Follow = targetGroupWhenLow.transform;
             }
@@ -153,19 +169,83 @@ public class RedBird : MonoBehaviour
             {
                 if (_state != State.Ascend && _state != State.Descend)
                     cm_camera.Follow = targetGroupWhenNormal.transform;
+                //if (_state == State.Ascend && cm_camera.Follow == targetGroupWhenLow.transform && player_height < x)
+                //    cm_camera.Follow = targetGroupWhenLow.transform;
             }
             if (_state == State.Ascend || _state == State.Descend)
                 cm_camera.Follow = targetGroupWhenNormal.transform;
         }else cm_camera.Follow = targetGroupWhenNormal.transform;
     }
 
+    public void Die()
+    {
+        //enabled = false; // stop the update function
+        //stillAlive = false;
+        stillAlive = false;
+        GetComponent<Animator>().enabled = false;
+        GetComponent<SpriteRenderer>().sprite = _deadSprite;
+        cm_camera.Follow = targetCatOnly.transform;
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            Transform child = transform.GetChild(i);
+            child.gameObject.SetActive(false);
+        }
+        _rigidbody2D.velocity = new Vector2(-0.7f, -10f);
+    }
+
+    private void fallToGrave()
+    {
+        if (falling[0])
+        {
+            cemetery.SetActive(true);
+            if (transform.position.y < -32)  // cat reach ground
+            {
+                _rigidbody2D.velocity = Vector2.zero;
+                var t_group = targetCatOnly.GetComponent<CinemachineTargetGroup>();
+                t_group.m_Targets[0].target = GameObject.Find("graveYard").transform;
+                t_group.m_Targets[0].radius = 10.5f;
+                cm_camera.Follow = t_group.transform;
+                grave.SetActive(true);
+                falling[0] = false;
+            }
+            else
+            {
+                transform.Rotate(new Vector3(0, 0, 2f), Space.World);
+            }
+        } 
+
+        else if (falling[1] || falling[2])
+        {
+            if (grave.transform.position.y <= -22)  // stop falling?
+            {
+                Debug.Log("here! "+ grave.transform.position.y);
+                grave_rb.velocity = new Vector2(0, 0);
+                falling[2] = false;
+                grave_rb.bodyType = RigidbodyType2D.Static;
+                this.gameObject.SetActive(false);
+            }
+            else if (falling[1])
+            {
+                grave_rb.velocity = new Vector2(0, -50f);
+                falling[1] = false;
+            }
+        }
+    }
+
+
     // Update is called once per frame
     void Update()
     {
-        keepFlying();
-        
-    }
+        if (stillAlive)
+        {
+            keepFlying();
+        } 
+        else
+        {
+            fallToGrave();
+        }
 
+    }
 
     //void OnMouseDown()
     //{

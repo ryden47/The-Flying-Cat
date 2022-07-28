@@ -8,22 +8,26 @@ public class LevelController_A : MonoBehaviour
 {
     [SerializeField] string _nextLevelName;
     [SerializeField] public float backgroundSpeed;
+    [SerializeField] public bool godMode = false;
 
-    GameObject player;
+    RedBird player;
+    CoinCounter coinCounter;
+    public GameOverScreen gameOverScreen;
     Dragon[] _dragons;
 
     void OnEnable()
     {
         _dragons = FindObjectsOfType<Dragon>();
-        player = GameObject.Find("Red Bird");
-        //backgroundSpeed = (float)-3d;
+        player = GameObject.Find("Red Bird").GetComponent<RedBird>();
     }
 
     // Update is called once per frame
     void Update()
     {
         //if (MonstersAreAllDead())
-       //     GoToNextLevel();
+        //    GoToNextLevel();
+        if (player.falling[2] == false)
+            gameOverScreen.Setup(Prize.totalCoins);
     }
 
     private void GoToNextLevel()
@@ -35,7 +39,6 @@ public class LevelController_A : MonoBehaviour
     private bool MonstersAreAllDead()
     {
         foreach (var dragon in _dragons) {
-
             if (dragon.gameObject.activeSelf)
                 return false;
         }
@@ -45,6 +48,15 @@ public class LevelController_A : MonoBehaviour
 
     public void GameOver()
     {
-        player.GetComponent<SpriteRenderer>().sprite = null;
+        if (!godMode)
+        {
+            player.Die();
+            // wait until cat falls!
+        }
+        else
+        {
+            Debug.Log("Can't die when in god mod");
+        }
+
     }
 }
