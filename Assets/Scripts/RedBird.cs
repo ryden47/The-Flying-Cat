@@ -7,6 +7,7 @@ public class RedBird : MonoBehaviour
 {
     //[SerializeField] float _launchForce = 500;
     //[SerializeField] float _maxDragDistance = 5;
+    [SerializeField] Sprite _deadSprite;
     [SerializeField] float _flySpeed = 4f;
     [SerializeField] float viewRange = 2;
     [SerializeField] bool limitCameraView;

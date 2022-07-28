@@ -15,7 +15,6 @@ public class Monster : MonoBehaviour
     {
         if (ShouldDieFromCollision(collision))
         {
-
             StartCoroutine(Die());
         }
        

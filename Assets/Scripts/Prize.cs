@@ -41,7 +41,7 @@ public class Prize : MonoBehaviour
         if (player != null)
         {
             //gameLevelManager.AddCoins(coinValue);
-            totalCoins+=coinValue;
+            totalCoins += coinValue;
             StartCoroutine(CollectPrize());
 
         }
