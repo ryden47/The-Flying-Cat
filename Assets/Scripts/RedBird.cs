@@ -9,8 +9,14 @@ public class RedBird : MonoBehaviour
     //[SerializeField] float _maxDragDistance = 5;
     [SerializeField] float _flySpeed = 4f;
     [SerializeField] float viewRange = 2;
-    Transform upperFocus, lowerFocus, upper_sqr, lower_sqr;
-    float constant_x_position;
+    [SerializeField] bool limitCameraView;
+    Transform upperFocus, lowerFocus, useWhenLow, useWhenHigh;
+    float constant_x_position1;
+    float constant_x_position2;
+    GameObject targetGroupWhenNormal;
+    GameObject targetGroupWhenLow;
+    GameObject targetGroupWhenHigh;
+    Cinemachine.CinemachineVirtualCamera cm_camera;
 
     enum State
     {
@@ -26,7 +32,8 @@ public class RedBird : MonoBehaviour
     State _state;
     float _upperScreenBound;//4.6f;
     float _lowerScreenBound;//-2.6f;
-    new Cinemachine.CinemachineTargetGroup camera;
+    
+    //new Cinemachine.CinemachineTargetGroup camera;
 
     private void Awake()
     {
@@ -35,12 +42,17 @@ public class RedBird : MonoBehaviour
         _state = State.IdleDescend;
         upperFocus = this.gameObject.transform.Find("upperFocus");
         lowerFocus = this.gameObject.transform.Find("lowerFocus");
-        constant_x_position = upperFocus.position.x;
+        useWhenHigh = GameObject.Find("raiseHigher").transform;
+        useWhenLow = GameObject.Find("pullDown").transform;
+        constant_x_position1 = upperFocus.position.x;
+        constant_x_position2 = useWhenHigh.position.x;
         _upperScreenBound = GameObject.Find("Mountains & Clouds").transform.position.y + (float)6.8;
         _lowerScreenBound= GameObject.Find("Ground").transform.position.y + (float)1.45;
 
-        camera = GameObject.Find("TargetGroup").GetComponent<Cinemachine.CinemachineTargetGroup>();
-        //camera.GetComponent<Cinemachine.CinemachineTargetGroup>()
+        cm_camera = GameObject.Find("CM vcam1").GetComponent<Cinemachine.CinemachineVirtualCamera>();
+        targetGroupWhenHigh = GameObject.Find("TargetGroupWhenHigh");
+        targetGroupWhenLow = GameObject.Find("TargetGroupWhenLow"); ;
+        targetGroupWhenNormal = GameObject.Find("TargetGroup");
     }
 
     // Start is called before the first frame update
@@ -48,6 +60,7 @@ public class RedBird : MonoBehaviour
     {
         _startPosition = _rigidbody2D.position;
         _rigidbody2D.isKinematic = true;
+
     }
 
     void FlyUp()
@@ -118,9 +131,31 @@ public class RedBird : MonoBehaviour
         {
             StopMoving();
         }
+
         // Keeping the position of the focus objects relative to the bird's y position ONLY.
-        upperFocus.position = new Vector2(constant_x_position, this.transform.position.y + viewRange);
-        lowerFocus.position = new Vector2(constant_x_position, this.transform.position.y - viewRange);
+        upperFocus.position = new Vector2(constant_x_position1, this.transform.position.y + viewRange);
+        lowerFocus.position = new Vector2(constant_x_position1, this.transform.position.y - viewRange);
+        useWhenHigh.position = new Vector2(constant_x_position2, this.transform.position.y + (viewRange+(float)3.6));
+        useWhenLow.position = new Vector2(constant_x_position2, this.transform.position.y - (viewRange+(float)3.6));
+        if (limitCameraView)
+        {
+            float player_height = gameObject.transform.position.y;
+            if (player_height <= -1.6)  // if i'm too low, lift the camera view
+            {
+                cm_camera.Follow = targetGroupWhenLow.transform;
+            }
+            else if (player_height >= 6.14)  // if i'm too high, lower the camera view
+            {
+                cm_camera.Follow = targetGroupWhenHigh.transform;
+            }
+            else // i'm at the middle of the playground. keep the camera centered.
+            {
+                if (_state != State.Ascend && _state != State.Descend)
+                    cm_camera.Follow = targetGroupWhenNormal.transform;
+            }
+            if (_state == State.Ascend || _state == State.Descend)
+                cm_camera.Follow = targetGroupWhenNormal.transform;
+        }else cm_camera.Follow = targetGroupWhenNormal.transform;
     }
 
     // Update is called once per frame
