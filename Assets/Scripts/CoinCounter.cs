@@ -4,7 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SC_CoinCounter : MonoBehaviour
+public class CoinCounter : MonoBehaviour
 {
     TextMeshProUGUI counterText;
 

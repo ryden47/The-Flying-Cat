@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class Dragon : MonoBehaviour
 {
-    [SerializeField] float speed = 10.0f;
+    private LevelController_A levelController;
+    private float speed;
     private Rigidbody2D rb;
     private float leftBorder;
 
@@ -18,6 +19,7 @@ public class Dragon : MonoBehaviour
         leftBorder = Camera.main.ViewportToWorldPoint(new Vector3(0, 0, dist)).x;
 
         GameObject ground = GameObject.FindGameObjectWithTag("Background");
+        levelController = GameObject.Find("LevelController").GetComponent<LevelController_A>();
         Physics2D.IgnoreCollision(ground.GetComponent<Collider2D>(), GetComponent<Collider2D>());
        // Physics2D.IgnoreLayerCollision(0, 1);
        // Physics2D.IgnoreLayerCollision(0, 2);
@@ -27,8 +29,9 @@ public class Dragon : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        speed = levelController.backgroundSpeed;
+        rb.velocity = new Vector2(-speed, 0);
         if (transform.position.x < leftBorder) {
-
             //gameObject.SetActive(false);
             Destroy(this.gameObject);
         }
@@ -36,12 +39,15 @@ public class Dragon : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        Debug.Log("Collided with" + collision.gameObject);
-        if (ShouldDieFromCollision(collision))
+        RedBird player = collision.gameObject.GetComponent<RedBird>();  // if it was not hit by the RedBird, then it will be null
+        if (player != null)
         {
-            StartCoroutine(Die());
+            Debug.Log("A dragon just hit the cat!");
+            levelController.GameOver();
         }
     }
+
+
     bool ShouldDieFromCollision(Collision2D collision)
     {
         RedBird bird = collision.gameObject.GetComponent<RedBird>();
